@@ -1,6 +1,7 @@
 ---
-prefix: 这是一个前缀
+prefix: test_prefix
 description: 这是一个描述
+tag: tag1,tag2
 ---
 
 ```

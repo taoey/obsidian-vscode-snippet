@@ -1,142 +1,67 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
-	"regexp"
 	"strings"
-
-	"github.com/gomarkdown/markdown/ast"
-	"github.com/gomarkdown/markdown/parser"
-	"gopkg.in/yaml.v3"
+	"taoey/obsidian-vscode-snippet/util"
 )
 
-type VscodeSnippet struct {
-	Prefix      string   `json:"prefix"`
-	Scope       string   `json:"scope"`
-	Description string   `json:"description"`
-	Body        []string `json:"body"`
-}
-
-// Snippet 表示解析后的代码片段结构
-type Snippet struct {
-	Prefix       string `yaml:"prefix"`
-	Description  string `yaml:"description"`
-	Code         string
-	CodeLanguage string
-}
-
-// 生成代码片段的json
-func genCodeJson() string {
-	return ""
-}
-
-// extractFirstCodeBlock 提取第一个代码块
-func extractFirstCodeBlock(markdownContent string) (string, string) {
-	// 创建解析器
-	extensions := parser.CommonExtensions | parser.AutoHeadingIDs
-	p := parser.NewWithExtensions(extensions)
-
-	// 解析Markdown
-	doc := p.Parse([]byte(markdownContent))
-
-	var language string
-	var codeContent string
-
-	// 遍历AST查找第一个代码块
-	ast.WalkFunc(doc, func(node ast.Node, entering bool) ast.WalkStatus {
-		if !entering {
-			return ast.GoToNext
-		}
-
-		// 检查是否是代码块
-		if codeBlock, ok := node.(*ast.CodeBlock); ok {
-			if codeContent == "" { // 只取第一个代码块
-				language = string(codeBlock.Info)
-				codeContent = string(codeBlock.Literal)
-				return ast.Terminate // 找到第一个后停止遍历
-			}
-		}
-		return ast.GoToNext
-	})
-
-	return language, codeContent
-}
-
-func parseSnippetFromMD(mdText string) (*Snippet, error) {
-	// 正则匹配 YAML front matter: 以 --- 开始和结束的部分
-	re := regexp.MustCompile(`(?s)^---\s*\n(.*?)\n---\s*`)
-	matches := re.FindStringSubmatch(mdText)
-
-	var metadata []byte
-	remaining := mdText
-
-	if len(matches) >= 2 {
-		metadata = []byte(matches[1])
-		remaining = mdText[len(matches[0]):]
-	}
-	snippet := &Snippet{}
-	// 解析 YAML
-	if len(metadata) > 0 {
-		err := yaml.Unmarshal(metadata, snippet)
-		if err != nil {
-			return nil, fmt.Errorf("YAML 解析失败: %w", err)
-		}
-	}
-	language, code := extractFirstCodeBlock(remaining)
-	// fmt.Println("匹配到的文档", string(metadata), snippet.Prefix)
-	// fmt.Println("匹配结果", snippet.Description)
-	// fmt.Println("剩余文档", remaining)
-	snippet.CodeLanguage = language
-	snippet.Code = code
-
-	return snippet, nil
-}
-
-func readMDFile(path string) (string, error) {
-	if _, err := os.Stat(path); os.IsNotExist(err) {
-		return "", fmt.Errorf("文件不存在: %s", path)
-	}
-	content, err := os.ReadFile(path)
+// 获取单个文件的代码片段
+func GetOneFileVscodeSnippet(filePath string) (*util.VscodeSnippet, error) {
+	mdContent, err := util.ReadMDFile(filePath)
 	if err != nil {
-		return "", err
+		fmt.Println("读取文件错误: ", os.Stderr, err)
+		return nil, err
 	}
-	return string(content), nil
-}
-
-func main() {
-	if len(os.Args) != 2 {
-		fmt.Fprintf(os.Stderr, "用法: %s <Markdown文件路径>\n", os.Args[0])
-		os.Exit(1)
-	}
-
-	filePath := os.Args[1]
-	mdContent, err := readMDFile(filePath)
+	snippet, err := util.ParseSnippetFromMD(mdContent)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "读取文件错误: %v\n", err)
-		os.Exit(1)
+		return nil, err
 	}
-
-	snippet, err := parseSnippetFromMD(mdContent)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "解析错误: %v\n", err)
-		os.Exit(1)
-	}
-
-	fmt.Println("✅ 解析成功:")
-	fmt.Printf("prefix:      %q\n", snippet.Prefix)
-	fmt.Printf("description: %q\n", snippet.Description)
-	fmt.Printf("code:        %q\n", snippet.Code)
-
 	codelines := strings.Split(snippet.Code, "\n")
-
-	vscodeSnippet := VscodeSnippet{
+	vscodeSnippet := util.VscodeSnippet{
 		Prefix:      snippet.Prefix,
-		Scope:       snippet.CodeLanguage,
+		Scope:       snippet.Scope,
 		Description: snippet.Description,
 		Body:        codelines,
 	}
+	return &vscodeSnippet, nil
+}
 
-	fmt.Println(vscodeSnippet)
+func main() {
+	config := util.GetConfig()
+	// 1、加载文件列表
+	dirpath := config.ObsidianDir
 
+	mdFilepathList, err := util.GetDirSubMDFilepath(dirpath)
+	if err != nil {
+		fmt.Println("获取markdown文件失败:", err)
+		return
+	}
+	// 2、处理每个文件，生成对应的vscode snippet
+	snippetMap := make(map[string]util.VscodeSnippet)
+	for _, filePath := range mdFilepathList {
+		vscodeSnippet, err := GetOneFileVscodeSnippet(filePath)
+		if err != nil {
+			fmt.Println("处理文件失败:", filePath, err)
+			continue
+		}
+		// 只有有前缀的才有效
+		if vscodeSnippet.Prefix == "" {
+			continue
+		}
+		snippetMap[vscodeSnippet.Prefix] = *vscodeSnippet
+	}
+	resultJsonByte, _ := json.MarshalIndent(snippetMap, "", "  ")
+
+	// 3、存储json到指定文件中，需要格式化输出
+	outFilePath := config.OutputFilepath
+	for _, outFilepath := range outFilePath {
+		err = os.WriteFile(outFilepath, resultJsonByte, 0644)
+		if err != nil {
+			fmt.Println("写入文件失败:", outFilepath, err)
+		}
+		fmt.Println("写入文件成功:", outFilepath)
+	}
 }
