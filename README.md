@@ -28,7 +28,9 @@
 
 ```
 {
-    "obsidian-dir":"",
-    "output-filepath": []
+    "obsidian-dir":"",  // obsidian知识库的路径
+    "output-filepath": []  // 需要产出的代码片段路径，支持多个路径
 }
 ```
+
+4、可以使用crontab 来进行定时同步，如果着急也可以直接手动执行进行同步
