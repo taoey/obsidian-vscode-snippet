@@ -52,8 +52,9 @@ func GetDirSubMDFilepath(dirFilepath string) ([]string, error) {
 const configFilepath = "config/config.json"
 
 type Config struct {
-	ObsidianDir    string   `json:"obsidian-dir"`
-	OutputFilepath []string `json:"output-filepath"`
+	ObsidianDir              string   `json:"obsidian_dir"`
+	OutputFilepath           []string `json:"output_filepath"`
+	NoNeedConvertSpecialChar []string `json:"no_need_convert_special_char"`
 }
 
 func GetConfig() *Config {

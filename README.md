@@ -34,3 +34,9 @@
 ```
 
 4、可以使用crontab 来进行定时同步，如果着急也可以直接手动执行进行同步
+
+
+
+参考资料：
+- Visual Studio Code 中的片段 https://vscode.github.net.cn/docs/editor/userdefinedsnippets
+- VS Code 代码片段指南: 从基础到高级技巧 https://www.jianshu.com/p/3dc1b7f101bc
