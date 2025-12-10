@@ -2,9 +2,34 @@ package util
 
 import (
 	"fmt"
+	"os"
 	"regexp"
 	"strings"
 )
+
+// 获取单个文件的代码片段
+func GetOneFileVscodeSnippet(filePath string, noNeedConvertSpecialChar []string) (*VscodeSnippet, error) {
+	mdContent, err := ReadMDFile(filePath)
+	if err != nil {
+		fmt.Println("读取文件错误: ", os.Stderr, err)
+		return nil, err
+	}
+	snippet, err := ParseSnippetFromMD(mdContent)
+	if err != nil {
+		return nil, err
+	}
+	// 特殊字符转换
+	snippet.Code = EscapeSpecialChars(snippet.Code, noNeedConvertSpecialChar)
+
+	codelines := strings.Split(snippet.Code, "\n")
+	vscodeSnippet := VscodeSnippet{
+		Prefix:      snippet.Prefix,
+		Scope:       snippet.Scope,
+		Description: snippet.Description,
+		Body:        codelines,
+	}
+	return &vscodeSnippet, nil
+}
 
 // 特殊字符转换
 func EscapeSpecialChars(code string, noNeedConvertSpecialChar []string) string {

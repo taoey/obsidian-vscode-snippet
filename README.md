@@ -1,6 +1,7 @@
 # obsidian-vscode-snippet
 使用obsidian来管理vscode的代码片段
 
+链接：https://github.com/taoey/obsidian-vscode-snippet
 
 
 1、vscode代码片段组成部分

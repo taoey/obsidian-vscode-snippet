@@ -4,33 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
-	"strings"
 	"taoey/obsidian-vscode-snippet/util"
 )
-
-// 获取单个文件的代码片段
-func GetOneFileVscodeSnippet(filePath string, noNeedConvertSpecialChar []string) (*util.VscodeSnippet, error) {
-	mdContent, err := util.ReadMDFile(filePath)
-	if err != nil {
-		fmt.Println("读取文件错误: ", os.Stderr, err)
-		return nil, err
-	}
-	snippet, err := util.ParseSnippetFromMD(mdContent)
-	if err != nil {
-		return nil, err
-	}
-	// 特殊字符转换
-	snippet.Code = util.EscapeSpecialChars(snippet.Code, noNeedConvertSpecialChar)
-
-	codelines := strings.Split(snippet.Code, "\n")
-	vscodeSnippet := util.VscodeSnippet{
-		Prefix:      snippet.Prefix,
-		Scope:       snippet.Scope,
-		Description: snippet.Description,
-		Body:        codelines,
-	}
-	return &vscodeSnippet, nil
-}
 
 func main() {
 	config := util.GetConfig()
@@ -46,7 +21,7 @@ func main() {
 	// 2、处理每个文件，生成对应的vscode snippet
 	snippetMap := make(map[string]util.VscodeSnippet)
 	for _, filePath := range mdFilepathList {
-		vscodeSnippet, err := GetOneFileVscodeSnippet(filePath, config.NoNeedConvertSpecialChar)
+		vscodeSnippet, err := util.GetOneFileVscodeSnippet(filePath, config.NoNeedConvertSpecialChar)
 		if err != nil {
 			fmt.Println("处理文件失败:", filePath, err)
 			continue
