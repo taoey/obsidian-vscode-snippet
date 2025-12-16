@@ -4,7 +4,7 @@ import os
 from datetime import datetime
 
 app = Flask(__name__)
-JSON_FILE = '../config/config.json'
+JSON_FILE = 'config/config.json'
 
 # 初始化默认数据（如果文件不存在）
 DEFAULT_DATA = {
@@ -91,4 +91,4 @@ def save_data():
         return jsonify({'error': '❌ 保存失败: ' + str(e)}), 500
 
 if __name__ == '__main__':
-    app.run(debug=True, host='127.0.0.1', port=5000)
+    app.run(debug=True, host='0.0.0.0', port=5000)

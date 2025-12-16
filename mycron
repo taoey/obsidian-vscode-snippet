@@ -1,0 +1,1 @@
+* * * * * cd /home/work/obsidian-vscode-snippet &&./app-exe >> /home/work/obsidian-vscode-snippet/run.log 2>&1
