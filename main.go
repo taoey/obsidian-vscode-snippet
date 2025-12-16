@@ -30,7 +30,13 @@ func main() {
 		if vscodeSnippet.Prefix == "" {
 			continue
 		}
-		snippetMap[vscodeSnippet.Prefix] = *vscodeSnippet
+		desc := vscodeSnippet.Description
+		// 如果描述为空，则使用前缀作为描述
+		if desc == "" {
+			desc = vscodeSnippet.Prefix
+		}
+		vscodeSnippet.Description = ""
+		snippetMap[desc] = *vscodeSnippet
 	}
 	resultJsonByte, _ := json.MarshalIndent(snippetMap, "", "  ")
 

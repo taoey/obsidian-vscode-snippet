@@ -1,7 +1,7 @@
 {
-  "obsidian_dir": "test_dir",
+  "obsidian_dir": "data/obsidian_data",
   "output_filepath": [
-    "/Users/th/Library/Application Support/Code/User/snippets/obsidian.code-snippets"
+    "data/snippets/obsidian.code-snippets"
   ],
   "no_need_convert_special_char": [
     "TM_SELECTED_TEXT",
