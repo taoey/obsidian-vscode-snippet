@@ -1,31 +1,30 @@
 # obsidian-vscode-snippet
-使用obsidian来管理vscode的代码片段
-
-链接：https://github.com/taoey/obsidian-vscode-snippet
-
-
-1、vscode代码片段组成部分
+简要说明：使用obsidian来管理vscode的代码片段
+github：https://github.com/taoey/obsidian-vscode-snippet
+docker hub : https://hub.docker.com/repository/docker/taoey/obsidian-vscode-snippet/general
 
 
-2、读取vscode的代码片段
+## 1、功能描述
+本项目旨在更好的管理日常开发中的代码片段，
+可以在obsidian中添加代码片段，之后便可在vscode(或基于vscode开发的第三方开发软件)中快捷调用。
+个人认为在vscode开发环境下是，该方案是一种比较好的代码片段管理方式
 
-/Users/th/Library/Application Support/Code/User/snippets/obsidian.code-snippets
+## 2、安装使用
 
-
-{
-    "pd": {
-        "prefix": "pdhello",
-        "scope": "python",
-        "description": "",
-        "body": [
-            "import pandas as pd ",
-            ""
-        ]
-    },
-}
+### 2.1 本地编译
 
 
-3、配置文件说明
+### 2.2 docker安装
+
+
+### 2.3 使用讲解(视频)
+
+
+
+## 3 其他
+### 3.1 配置文件说明
+
+在mac下vscode代码片段位置： /Users/{your_name}/Library/Application Support/Code/User/snippets/obsidian.code-snippets
 
 ```
 {
@@ -34,12 +33,9 @@
 }
 ```
 
-4、可以使用crontab 来进行定时同步，如果着急也可以直接手动执行进行同步
 
-
-
-参考资料：
-- Visual Studio Code 中的片段 https://vscode.github.net.cn/docs/editor/userdefinedsnippets
+## 参考资料：
+- Visual Studio Code 中的片段 https://vscode.github.net.cn/docs/editor/userdefinedsnippets  
 - VS Code 代码片段指南: 从基础到高级技巧 https://www.jianshu.com/p/3dc1b7f101bc
 
 
