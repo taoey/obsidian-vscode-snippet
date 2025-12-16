@@ -38,13 +38,14 @@ func EscapeSpecialChars(code string, noNeedConvertSpecialChar []string) string {
 		noNeedConvertSpecialCharSet[item] = struct{}{}
 		noNeedConvertSpecialCharSet["{"+item+"}"] = struct{}{}
 	}
-
 	// 匹配 $VAR 或 ${VAR} 格式
 	// 正则提取所有 $的变量，以空格为界限
+	// 添加反斜杠
 	pattern := `\$(\w+|\{\w+\})`
 	re := regexp.MustCompile(pattern)
 	// 打印所有结果
 	matches := re.FindAllStringSubmatch(code, -1)
+	varMap := make(map[string]string)
 	for _, match := range matches {
 		varVal := match[0]
 		varName := match[1]
@@ -52,8 +53,11 @@ func EscapeSpecialChars(code string, noNeedConvertSpecialChar []string) string {
 		if _, ok := noNeedConvertSpecialCharSet[varName]; ok {
 			continue
 		}
-		code = strings.ReplaceAll(code, varVal, "\\"+varVal)
+		varMap[varVal] = varName
 	}
-
+	// 匹配到的变量进行去重，保障只替换一次
+	for varVal := range varMap {
+		code = strings.ReplaceAll(code, varVal, `\`+varVal)
+	}
 	return code
 }
